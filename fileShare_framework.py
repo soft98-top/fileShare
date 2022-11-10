@@ -71,6 +71,9 @@ class Util:
             data = h.hexdigest().encode("utf-8")
         encode_pass = base64.b64encode(data)
         return encode_pass*100
+    ## json bas64输出
+    def json_base64(data):
+        return base64.b64encode(json.dumps(data).encode("utf-8")).decode("utf-8")
 
 ## 文件处理类
 class FileHandle:
@@ -130,7 +133,7 @@ class CloudService:
             ## 自行实现的shareCode组成
             "mix":file.mix
         }
-        return base64.b64encode(json.dumps(scode).encode("utf-8")).decode("utf-8")
+        return scode
         # 如果错误可以用error方法输出
         # Util.error("文件上传失败")
     
@@ -203,7 +206,7 @@ class Main:
                     file.mix = nav_mix_flag
                     FileHandle.get_file_data(file,Config.fix_size)
                     scode = CloudService.upload(file)
-                    nav["data"].append(scode)
+                    nav["data"].append(Util.json_base64(scode))
                     if nav_mix_flag:
                         nav_mix_flag = False
                     index += 1
@@ -212,7 +215,7 @@ class Main:
             file.file_size = real_size
             FileHandle.get_file_data(file,real_size)
             scode = CloudService.upload(file)
-            nav["data"].append(scode)
+            nav["data"].append(Util.json_base64(scode))
             if index > 0:
                 nav_file = File()
                 nav_file.file_name = file.file_name
@@ -220,7 +223,7 @@ class Main:
                 nav_file.mix = Config.mix
                 scode = CloudService.upload(nav_file)
                 scode["mode"] = "nav"
-            Util.stdout("ShareCode: " + scode)
+            Util.stdout("ShareCode: " + Util.json_base64(scode))
     ## 文件下载
     def download(scode):
         scode = json.loads(base64.b64decode(scode.encode("utf-8")).decode("utf-8"))
